@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Bioinformatics Project - Enrico Gallus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #f5f4f0;
+            font-family: 'Inter', sans-serif;
+            font-size: 15.5px;
+            line-height: 1.75;
+            color: #1e2a38;
+            padding: 0;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 48px auto 80px;
+            padding: 0 24px;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #1a2e4a;
+            border-radius: 14px;
+            padding: 48px 52px;
+            margin-bottom: 48px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        header::after {
+            content: '';
+            position: absolute;
+            right: -60px; top: -60px;
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(99,179,237,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        header h1 {
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 1.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        header p {
+            color: #a8c4dc;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        header b { color: #d0e8f5; font-weight: 600; }
+
+        /* ── Section divider ── */
+        hr {
+            border: none;
+            border-top: 1px solid #ddd9d0;
+            margin: 40px 0;
+        }
+
+        /* ── Headings ── */
+        h2 {
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a2e4a;
+            margin: 40px 0 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2ddd4;
+        }
+
+        /* ── Body text ── */
+        p {
+            margin-bottom: 14px;
+            color: #334155;
+        }
+
+        b { color: #1e2a38; }
+
+        ul, ol {
+            padding-left: 22px;
+            margin: 12px 0 18px;
+        }
+        li {
+            margin-bottom: 6px;
+            color: #334155;
+        }
+
+        /* ── Script section headings (the bold filenames) ── */
+        b.script {
+            display: block;
+            font-family: 'Inter', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: #1a2e4a;
+            background: #eef2f7;
+            border-left: 3px solid #3b82f6;
+            padding: 8px 14px;
+            border-radius: 0 6px 6px 0;
+            margin: 28px 0 12px;
+        }
+
+        /* ── Image boxes ── */
+        .img-box {
+            background: #fff;
+            border: 1px solid #ddd9d0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 28px 0 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        .img-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        /* ── Interpretation boxes ── */
+        .interp-box {
+            background: #fff;
+            border: 1px solid #ddd9d0;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 24px 28px;
+            margin: 0 0 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .interp-box p:last-child { margin-bottom: 0; }
+        .interp-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #1a2e4a;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 32px 0 0;
+            border-top: 1px solid #ddd9d0;
+            margin-top: 16px;
+            color: #8a9ab0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <header>
+        <h1>Transcriptomic Analysis of Multiple Myeloma Patients</h1>
+        <p><b>Internship Practical Assignments in R</b></p>
+        <p>By: Enrico Gallus (MSc Bioinformatics Student)</p>
+    </header>
+
+    <h2>Project Overview</h2>
+    <p>In this project, I completed three assignments to analyze RNA-seq data from 767 patients. The goal was to go from raw data to finding different groups of patients based on their genes.</p>
+    
+    <ul>
+        <li><b>Assignment 1:</b> Cleaning the data and filtering samples.</li>
+        <li><b>Assignment 2:</b> Mapping IDs and running ssGSEA pathways.</li>
+        <li><b>Assignment 3:</b> Clustering patients and finding marker genes.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Assignment 1: Data Cleaning</h2>
+    <p>The dataset was the MMRF CoMMpass IA22. I had to filter the columns to keep only the important ones:</p>
+    <ol>
+        <li>Only therapy cycle 1 (baseline).</li>
+        <li>Only Bone Marrow (BM) samples.</li>
+        <li>Only CD138+ cells.</li>
+    </ol>
+    <p>I used "grep" to find these samples. Then I transposed the matrix so patients are rows and transcripts are columns. I rounded the numbers to 3 decimal places to save space.</p>
+
+    <hr>
+
+    <h2>Assignment 2, Gene Mapping and ssGSEA:</h2>
+   
+    <p>The goal of this assignment was to perform an enrichment analysis, so answer to the question: what are the cellular pathways that appear deeply altered (basing on the transcriptomes I have)???</p>
+    <p>Generally to perform GSEA (gene set enrichment analysis), you would need a "healthy" reference transciptome that was sequenced from the same machine (in order to avoid biases), although I found out that I could avoid this just by performing a <b>ssGSEA</b>  </p>
+    <p><b>ssGSEA</b> = single sample GSEA</p>
+    <p>The original data used Ensembl IDs (ENST), but I needed Gene Symbols (like MYC) for the analysis since GSVA (the software that will let me run the ssGSEA can only use such symbols). I used a tool called <b>biomaRt</b> to do this conversion.</p>
+
+    <b class="script">Assignment_2_Load_Expression_Matrix</b>
+    <p><b>HOW?</b> I opened the connection with the specific BioMart connection object and then built a query variable (specific for biomart), by inputting the Ensbl transcipt IDs + some filters:</p>
+    <br> 1- attributes: so what kind of information I was looking for (ensmbl_transcrip_id + its CORRESPONDING hgnc_symbols)
+    <br> 2- filters: so what value the DB algorithm should rely on to search for results (ensmbl_transcrip_id)
+    <br> 3- values: where those values are stored (the actual variable with the list)
+    <br> 4- mart: connection to use
+    <p>After this I was left with the enriched version of the enst_ids variable which was now storing also the CORRESPONDING hgnc symbols</p>
+
+    <p>GSVA requires a numerical matrix (so no tibble) hgnc genes expression x patient, nothing more</p>
+    <p>Since many transcripts mapped to the same gene and many others didn't find a corrispondence at all:</p>
+    <br> 1- I kept the hgnc_symbols that were different from "" 
+    <br> 2- I removed redundancy by keeping for each gene group the transcripts with the highest average expression (i transposed the DF back to the transcript x patient version for later)
+    <br> 3- I got rid of uneeded columns (because GSVA doesn't need mean avrg expression and enst_IDs...)
+    <br> 4- I turned the tibble into a numeric matrix to finally make it fit the format requirements for GSVA 
+
+    <p> this was it, i saved the RDS file in the directory and started the ssGSEA in the following script break down</p>
+
+    <b class="script">Assignment_2_ssGSEA_Execution.R</b>
+    <p>The bioconductor library I used is called GSVA, I also imported the <b>BiocParallel</b>package for CPU core management and <b>msigDBr</b> to load the pathways collection directly into R</p>
+    <p>The pathways collection I used is called <b>Hallmark</b>, it stores 50 pathways specific for cancer clones analysis (I tried with richer collections but results were bad due to noise from random unrelated pathways)</p>
+    <p>After loading Hallmark, I turned the pathways DataFrame into a nested list of pathways and corresponding hgnc genes implied in that pathway (called gs_list)</p>
+    <p>it was used as a parameter for running the ssGSEA, here's all the parameters:</p>
+    <br> 1- exprData: the numerical matrix of genes x patient 
+    <br> 2- geneSets: the nested list we've just mentioned above (gs_list)
+    <br> 3- normalize = True: to normalize the data and make it meaningfull 
+    <br> 4- minSize and maxSize: min and max number of genes for pathway
+
+    <p>In order to better optimize my computational resources I split the workload over max cores - 1 (I kept one free to avoid my laptop going into coma)</p>
+
+    <p>Everything was ready so I ran the ssGSEA:</p>
+    <br> 1- following the parameters defined above
+    <br> 2- using the computational resources specified above
+    
+    <p>I then saved the output both as a RDS and CSV file</p>
+
+    <br><br>
+    <b class="script">Assignment_2_downstream_analysis.R</b>
+    <p>Now that I had the scores from the ssGSEA, I needed to visualize them to see what biological patterns were hiding in the data. I used visual libraries like <b>ComplexHeatmap</b> and <b>ggplot2</b>.</p>
+    
+    <p><b>HOW?</b> Here are the visualization steps:</p>
+    <br> 1- I loaded the ssGSEA scores matrix I just created (50 pathways x 767 patients).
+    <br> 2- I ranked all the pathways using MAD (Median Absolute Deviation). This helps find the pathways that vary the most across all the patients. I also cleaned up the pathway names (removing "HALLMARK_" and making them lowercase) so the graphs would look better.
+    <br> 3- <b>The Heatmap:</b> I created a big heatmap using a blue-to-red color scale. Blue meant low activity and red meant high activity. I clustered both the rows and columns so similar patients and pathways would group together visually.
+    <br> 4- <b>Violin Plots:</b> I reshaped my data and used ggplot2 to draw violin and box plots for all 50 pathways. This was to see the spread of scores and if some pathways were consistently active or very heterogeneous.
+    <br> 5- <b>PCA (Principal Component Analysis):</b> Finally, I ran a PCA on the scores to compress the data into two dimensions (PC1 and PC2). This plotted all the patients as dots to see if they form distinct, separate subgroups based on their pathway activity. I saved all these plots as PDFs.
+
+    <div class="img-box">
+        <img src="MMRF_heatmap_hallmarks.png" alt="Heatmap">
+    </div>
+    <div class="interp-box">
+        <p class="interp-title"><b>Interpretation: Hallmark Pathways Heatmap</b></p>
+        <p>
+            <b>Heatmap of 50 Hallmark Pathways.</b> This graph shows the enrichment scores for all 767 patients 
+            across the 50 biological pathways from the MSigDB Hallmark collection. The enrichment score (or ES) 
+            is a single numerical value that represents the degree to which a specific group of genes (pathway) 
+            is active in a single patient.
+        </p>
+        <p>
+            I used a color scale where deep red means high pathway activity (the pathway is "turned on") and 
+            deep blue means low activity or suppression (the pathway is "turned off"). The graph is mainly red.
+        </p>
+        <p>
+            <b>Why is the graph mainly red?</b> Well, as we said, Hallmark is a specific collection of 
+            known-to-be-involved-in-cancer pathways, what would you expect from 767 samples of patients 
+            with Multiple Myeloma? This is basically proving that there is a <b>Cancer Signature Bias</b>: 
+            the cancer-driving pathways are turned on across the board.
+        </p>
+        <p>
+            The most important thing to see here is how the rows (pathways) and columns (patients) are 
+            rearranged. Since I turned on clustering, the computer did an <b>unsupervised hierarchical 
+            clustering</b>. So the heatmap is forcing similar patients to stand next to each other and 
+            similar biological processes to group together into "blocks."
+        </p>
+        <p>
+            <b>Reading the row blocks from top to bottom.</b> The clustering has organized the 
+            50 pathways into meaningful biological groups. At the very top there is a dense <b>plasma cell 
+            identity block</b>: myc targets v1, myc targets v2, oxidative phosphorylation, protein secretion, 
+            unfolded protein response, and mtorc1 signaling all cluster together and are uniformly <b>red</b> for
+            almost every patient. <b>Why?</b> These are the core programs that define what a 
+            plasma cell is. They are not really distinguishing patients from each other; they are the shared 
+            biological background of the entire cohort.
+        </p>
+        <p>
+            Just below that we have a <b>proliferation block</b>: g2m checkpoint, e2f targets, and mitotic 
+            spindle group together. These pathways control cell cycle progression and DNA replication. 
+            These show more variation across patients, some columns 
+            are bright red here while others are pale, meaning some patients have highly proliferative 
+            tumors while others do not. This is clinically relevant: high proliferation in MM is associated 
+            with more aggressive disease.
+        </p>
+        <p>
+            Overall, this heatmap proves that Multiple Myeloma is not just one disease but it is a collection 
+            of different biological mechanisms acting with different intensities in different patients.
+        </p>
+    </div>
+    
+    <div class="img-box">
+        <img src="MMRF_PCA_hallmarks.png" alt="PCA">
+    </div>
+    <div class="interp-box">
+        <p class="interp-title"><b>Interpretation: PCA of Hallmark Pathway Scores</b></p>
+        <p>
+            <b>What is PCA doing here?</b> At this point I had a matrix of 50 numbers per patient 
+            (one ssGSEA score per Hallmark pathway). PCA (Principal Component Analysis) compresses those 50 
+            dimensions into just 2 underlying dimensions, called PC1 and PC2 (Prof. Bovo asked me about it), while trying to preserve as much of the original variation 
+            as possible. Each dot in this scatter plot is one of the 767 MM patients, and its position is determined 
+            entirely by their pathway activity profile.
+        </p>
+        <p>
+            <b>What do the axes mean?</b> PC1 captures <b>41.5% of the total variance</b> in the data, and PC2 
+            captures another <b>15.6%</b>. Together they summarize <b>57.1%</b> of all the biological variation 
+            across 50 pathways in just two numbers per patient. 
+        </p>
+        <p>
+            <b>What does the plot show?</b> All the dots are spread primarily close to PC1, which 
+            makes sense since it summarizes a lot of variance. There is no clean separation into tight isolated 
+            groups but the patients form a continuous distribution with some outliers stretching 
+            the "cloud". This means that MM in this cohort is not a disease with just a few 
+            molecular subtypes that are perfectly separated but we have patients 
+            transitioning differently between different pathway activation states.
+        </p>
+        <p>
+            <b>The outliers matter.</b> The patients sitting far from the main cloud, particularly those with 
+            extreme PC2 values might have very unusual pathway activity profiles. These could correspond to 
+            rare cytogenetic subtypes or high-risk patients with a very distinct transcriptional program. 
+        </p>
+        <p>
+            Overall, the PCA confirms whatwe said in the heathmap section: there is s biological structure in this 
+            cohort worth investigating, but it requires a solid clustering method (spoiler: Consensus Clustering) 
+            rather than just inspecting this graph visually.
+        </p>
+    </div>
+
+    <div class="img-box">
+        <p>[
+            <img src="MMRF_pathway_distributions_hallmarks.png" alt="Pathway Distributions">
+        </p>
+    </div>
+    <div class="interp-box">
+        <p class="interp-title"><b>Interpretation: Hallmark Pathway Score Distributions</b></p>
+        <p>
+            <b>What is this plot showing?</b> Each horizontal blue shape is a <b>violin plot</b> for the 50 
+            Hallmark pathways, representing how ssGSEA scores are distributed for all 767 patients for that 
+            pathway. The wider the violin at a given score is, the more patients have that score (range). The small white 
+            box inside each violin is a boxplot with the median and interquartile range. Pathways 
+            are ordered from bottom to top by their median score, so the most consistently active pathways 
+            are the ones at the top.
+        </p>
+        <p>
+            <b>The top of the chart, plasma cell identity pathways.</b> The pathways with the highest median 
+            scores are <b>myc targets v1, unfolded protein response, oxidative phosphorylation, protein secretion, 
+            and mtorc1 signaling</b>. This is not a coincidence, we've mentioned some of them above and these are exactly  
+            the hallmarks of normal plasma cell biology. The fact that these score highest across the entire cohort tells me 
+            the signal is dominated by the cell type identity (CD138+ plasma cells).
+        </p>
+        <p>
+            <b>The bottom of the chart, irrelevant biology.</b> At the very bottom sit pathways like 
+            <b>pancreas beta cells, spermatogenesis, and angiogenesis</b>. These score near zero across 
+            essentially all patients, which makes complete sense, we are looking at bone marrow 
+            plasma cells, so we would not expect pancreatic or reproductive tissue programs to be active. 
+            This is actually a good internal quality control: if these had scored high, something would have 
+            gone wrong in the pipeline.
+        </p>
+        <p>
+            <b>The most interesting pathways are the heterogeneous ones.</b> Pathways like 
+            <b>interferon alpha response, inflammatory response, and androgen response</b> show wide, irregular 
+            violin shapes, meaning some patients score very high while others score very low. This heterogeneity 
+            reflects the fact that not all MM patients have the same microenvironment or hormonal
+            signaling activity. These are the pathways that will likely drive the separation 
+            between clusters.
+        </p>
+        <p>
+            Overall, this plot confirms two things at once: the pipeline is working correctly (irrelevant 
+            pathways score low, plasma cell pathways score high), and there is genuine patient-to-patient 
+            variation in cancer-relevant pathways that is worth clustering.
+        </p>
+    </div>
+
+    <hr>
+
+    <h2>Assignment 3: Patient Clustering</h2>
+    <p>
+        The main reason of this analysis was to answer to the question :"<b>Do patient fall into dinstinct molecular 
+        sub-groups based on their gene expression?</b>".
+        To achieve this I needed the gene(hgnc_symbols) x patients matrix from assignment_2 first script.
+        The full matrix counts around 39.000 transcripts, way too many, expecially taking into account the fact that
+        the majority of these are not implied at all in any cancerogenic activity. To avoid dealing with such noise it
+        was clear that I had to normalize and build an informative gene set.
+    </p>
+    <br> 1- I applied the MAD function, like I did for the violin plot, besides this time by focusing all transcript average expression
+    <br> 2- I ordered the transcripts by MAD (decreasing order)
+    <br> 3- I took those 5000 hgnc genes and built a new matrix from it
+
+    <p> There it comes the normalization, data must be normalized to avoid richly expressed genes pulling the attention to themselves
+        We're going to apply the Z-Score normalization, it turns the question from <b>which genes are most expressed?</b> to <b>which
+        genes are most different from the average?</b>. Z-score = (score-mean)/standard deviation (for a whole column).
+        The scale function does that all at once but however it can only work with columnar values:
+    </p>
+    <br> 1- transpose the expr_top5000 matrix
+    <br> 2- let scale do its calculations
+    <br> 3- transpose tha matrix back to genes to patients
+
+    <div class="interp-box">
+        <p class="interp-title"><b>Consensus Clustering</b></p>
+        <p>(Since I never covered this here's my notes)
+            <p><b>Why does Consensus Clustering exists?</b>: when clustering with hierarchical clustering the resulting clusters (k) are just artifacts,
+            this means that adding new sequences or modifying some of the ones that you have could make many sequences shift cluster just because 
+            they were sitting right along the border between two different clusters. This is what consensus clustering prevents.
+            </p>
+            <p>
+            <b>How is it useful?</b>: It allows clustering patients reflecting a genuine biological subgroup, answering to the question:
+            <b>which patients robustly belong together across many different views of the data?</b>
+            </p>
+            <p>
+            <b>How does it work?</b>: It's a sort of iterative grouping algorithm, it takes a random subsample of patients (80% for me) for a 
+            fixed number of rounds (100 for me) and tries grouping them together basing on the similarity of their transcriptomic profiles. Every round, 
+            it records which patients ended up in the same group. After all 100 rounds, for every possible pair of patients it asks: "out of all the 
+            iterations where both of these patients were included, how many times were they together?" This frequency becomes their consensus score,
+            a number between 0 (never together) and 1 (always together). Patients that are robustly similar will score close to 1 regardless of which 
+            random subsample was used, while patients sitting on the boundary between groups will score around 0.5. 
+        </p></p>
+        <p><b>What do we get?</b>: ConsensusClusterPlus will iteratively group all patiens with the specified K groups and, after all 100 rounds, will
+            produce a CDL plot. From this we'll need the Delta Area to decide which K group number returned better clusters.
+        </p>
+    </div>
+    <div class="img-box">
+            <img src="Delta_Area.png" alt="Delta Area over K groups">
+    </div>
+    <div class="interp-box">
+        As we can see in the image, the better looking cluster K is K = 3, so we'll divide the patients in 3 groups.
+        Cluster 1 = 269, Cluster 2 = 371, Cluster 3 = 127.
+        <br> Once done so I started bulding the heathmap. To do so I used the pheathmap package and settled all the parameters to make the resulting heathmap 
+        pretty and readable.
+        <br> So I manually ordered the patients by cluster assignment, and then explicitly told pheatmap <b>not</b> to re-cluster the columns,
+        this way the three patient blocks stay visible and separated. The rows (genes) were 
+        still free to cluster, which is what reveals the gene expression blocks that characterize each patient group.
+        <br> I also added a color annotation bar on top of the heatmap using RColorBrewer, so each patient column is color-coded by their cluster 
+        membership (red = Cluster 1, blue = Cluster 2, green = Cluster 3). The expression color scale goes from deep blue (low expression) to deep 
+        red (high expression), same as the heatmap in Assignment 2.
+        <br> The result is a 5000 genes x 767 patients heatmap where you can clearly see three distinct patient blocks with their own gene expression 
+        programs, swhich is exactly the visual confirmation that k=3 was the right choice.
+        <br> Below you can see the resulting clusters heathmap 
+    </div>
+    <div class="img-box">
+            <img src="Cluster_Heathmap.png" alt="Delta Area over K groups">
+    
+            <div style="background-color: white; border: 1px solid black; padding: 15px; margin: 20px 0px;">
+    <p align="center">
+        <b>Interpretation: k=3 Consensus Cluster Heatmap (5000 genes x 767 patients)</b>
+    </p>
+    <p>
+        <b>What is that?</b> That heatmap shows the z-scored expression of the top 5000 most 
+        variable genes across all 767 patients. The expression color scale goes from deep blue (z-score = -3, 
+        well below average) to deep red (z-score = +3, well above average). Importantly, because these 
+        are z-scores and not raw expression values, blue does not mean a gene is off but it means that 
+        patient is expressing that gene <b> way below the average</b>. This is why the heatmap looks 
+        more balanced between red and blue compared to the Hallmark heatmap in Assignment 2, where 
+        everything was pushed red by the cancer signature bias.
+    </p>
+    <p>
+        <b>The dendrogram on the left?</b> The dendrogram on the left side groups genes that behave 
+        similarly across patients. You can see several major horizontal gene blocks emerging from it, 
+        groups of hundreds of genes that go up and down together across the three clusters. These blocks 
+        are what define the biological footprint of each cluster.
+    </p>
+    <p>
+        <b>Cluster 1, the high expression cluster.</b> The red block on the left (269 patients) is 
+        the "reddest" of the three. This doesn't mean they are the sickest or the most aggressive but 
+        it means their tumor cells have a transcriptional program that is generally more active across the most 
+        variable genes in the dataset.
+    </p>
+    <p>
+        <b>Cluster 2, the average cluster.</b> The blue block in the middle (371 patients, the 
+        largest group) is dominated by pale white and light tones across most gene blocks. This cluster 
+        sits closest to the cohort mean so its patients that are not extreme in either direction for most 
+        genes. This is biologically common in cancer cohorts: the largest subgroup is often the most 
+        "typical" one, while the smaller clusters capture the more extreme biological subtypes.
+    </p>
+    <p>
+        <b>Cluster 3, the most distinct cluster.</b> The green block on the right (127 patients) is 
+        the most visually striking. There are clear gene blocks where Cluster 3 is <b>strongly blue 
+        while Clusters 1 and 2 are red</b> which means these genes are specifically suppressed. 
+        There are also areas in the lower portion of the heatmap where Cluster 3 switches to red while 
+        the others are pale, genes uniquely upregulated in this group. 
+        This double pattern of specific suppressions and specific activations is what makes Cluster 3 
+        the most transcriptionally distinct subgroup, and (SPOILER ALEERT) it explains why it produced 
+        the most marker genes (407) in the downstream limma analysis. 
+    </p>
+</div>
+<b class="script">Assignment_3_MarkerGenesTables_heatmap.R</b>
+    <p>
+        Now that I had the three patient clusters done, the next question was: <b>which genes are 
+        actually responsible for making each cluster distinct?</b> These are called <b>marker genes</b> so 
+        genes that are specifically upregulated in one cluster and not in the others. To find them I used 
+        <b>limma</b>, a Bioconductor package.
+    </p>
+    <p>
+        Before running limma I applied a <b>log2(x+1) transformation</b> to the raw expression matrix. 
+        Limma expects data in log scale so the relationship between expression and variance 
+        becomes more linear and the statistically mwaningful.
+    </p>
+    <p>
+        I also had to make sure the patient order in the expression matrix matched EXACTLY the order in 
+        the cluster assignment because a single patient being out of order would silently assign wrong 
+        cluster labels to hundreds of patients and ruin everything (and it took me two hours to realize this).
+    </p>
+
+    <div class="interp-box">
+        <p class="interp-title"><b>One-vs-Rest Strategy</b></p>
+        <p>
+            For each of the three clusters I ran a separate <b>one-vs-rest</b> comparison: Cluster 1 vs 
+            (Cluster 2 + Cluster 3), then Cluster 2 vs the others, then Cluster 3 vs the others. Each 
+            comparison produces a ranked list of genes with their logFC (how much more expressed in this 
+            cluster vs the rest) and an adjusted p-value.
+        </p>
+        <p>
+            The core limma workflow for each comparison is three lines:
+            <br>1. <b>lmFit</b>: fits a linear model to the expression data using the one-vs-rest design matrix
+            <br>2. <b>eBayes</b>: applies empirical Bayes moderation, it borrows information across all genes 
+            to stabilize variance estimates, which is especially important when sample sizes per group are unequal
+            <br>3. <b>topTable</b>: extracts the ranked results table with logFC, p-values, and B-statistics
+        </p>
+    </div>
+
+    <div class="interp-box">
+        <p class="interp-title"><b>Specificity Filter</b></p>
+        <p>
+            Finding genes upregulated in one cluster is not enough, a gene might be upregulated in both 
+            Cluster 1 AND Cluster 2, which makes it useless as a marker for either. To find <b>true markers</b> 
+            I added a specificity filter: a gene qualifies only if it passes both of these conditions:
+        </p>
+        <p>
+            <br>1. It is significantly upregulated in its cluster: <b>logFC > 1.5</b> and <b>adjusted p-value &lt; 0.05</b>
+            <br>2. It is upregulated in <b>exactly one cluster</b> and not in any other
+        </p>
+        <p>
+            This two-step filter is what separates genuine cluster-specific markers from generic 
+            upregulation that happens to be significant. The result was:
+            <br>Cluster 1: <b>279 specific marker genes</b>
+            <br>Cluster 2: <b>299 specific marker genes</b>
+            <br>Cluster 3: <b>407 specific marker genes</b>
+        </p>
+        <p>
+            Cluster 3 having the most markers is consistent with what we saw in the heatmap, it is the 
+            most transcriptionally distinct group, so it has the most genes that are uniquely and 
+            specifically characteristic of it. Both the full marker tables and the top 20 per cluster 
+            were saved as CSVs for further inspection.
+        </p>
+    </div>
+
+    <p>
+        Finally I built a focused heatmap showing the <b>top 20 marker genes per cluster</b> (60 genes 
+        total) across all 767 patients. This is a much more interpretable visualization than the 5000-gene 
+        heatmap, each row is a gene that was specifically selected because it defines one of the three 
+        groups. The rows are annotated on the left with which cluster they belong to, and patients are 
+        again ordered and annotated by cluster on top. Row scaling (z-score per gene) is applied directly 
+        inside pheatmap via <b>scale = "row"</b> so the color patterns reflect relative expression 
+        rather than absolute levels.
+    </p>
+
+    <div class="img-box">
+        <img src="MMRF_marker_genes_heatmap_specific_k3.png" alt="Marker Genes Heatmap">
+    </div>
+    <div class="interp-box">
+        <p class="interp-title"><b>Interpretation: Top 20 Marker Genes per Cluster</b></p>
+        <p>
+            <b>What am I looking at?</b> This heatmap shows 60 genes, the top 20 most specifically 
+            upregulated markers for each of the three clusters, across all 767 patients. Unlike the 
+            5000-gene heatmap which showed the overall transcriptional landscape, every single row here 
+            was hand-selected by the limma analysis to be a genuine cluster-specific marker. The color 
+            annotation bar on the left tells you which cluster each gene belongs to, and the bar on top 
+            shows the patient cluster assignments as before.
+        </p>
+        <p>
+            <b>What a good marker heatmap looks like.</b> The expected pattern, and what you should see 
+            here, is a clean block diagonal structure: the red-annotated genes on the left should be 
+            bright red specifically in the Cluster 1 patient block and pale or blue everywhere else. The 
+            blue-annotated genes should light up only in Cluster 2. The green-annotated genes only in 
+            Cluster 3. The cleaner and sharper these blocks are, the more robust and biologically 
+            meaningful the clustering is.
+        </p>
+        <p>
+            <b>Cluster 3 markers are the most striking.</b> Consistent with having 407 specific markers,
+            the most of the three groups, the Cluster 3 gene block shows the sharpest contrast: genes 
+            that are strongly red in the green patient block and clearly suppressed everywhere else. This 
+            confirms that Cluster 3 has the most distinct transcriptional identity in the cohort, and 
+            these marker genes are the starting point for understanding what biological program defines 
+            this high-risk subgroup.
+        </p>
+        <p>
+            Overall, this heatmap is the final deliverable of the entire pipeline: starting from raw 
+            transcript-level RNA-seq data, we went through ID mapping, pathway enrichment, unsupervised 
+            clustering, and differential expression to arrive at a concrete list of genes that molecularly 
+            define each patient subgroup in Multiple Myeloma.
+        </p>
+    </div>
+
+    <div class="footer">
+        <b>Thank you for reading!</b>
+    </div>
+
+</div>
+</body>
+</html>

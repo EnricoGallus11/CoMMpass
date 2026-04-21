@@ -488,9 +488,10 @@
         <b>limma</b>, a Bioconductor package.
     </p>
     <p>
-        Before running limma I applied a <b>log2(x+1) transformation</b> to the raw expression matrix. 
+        Before running limma I applied a <b>log2(x+1) transformation</b> to the raw expression matrix with hgnc symbols from assignment 2. 
         Limma expects data in log scale so the relationship between expression and variance 
-        becomes more linear and the statistically mwaningful.
+        becomes more linear and the statistically meaningful. This because variance becomes more stable across 
+        the expression (min-max) range, preventing extremely high values to dominate.
     </p>
     <p>
         I also had to make sure the patient order in the expression matrix matched EXACTLY the order in 
@@ -502,15 +503,16 @@
         <p class="interp-title"><b>One-vs-Rest Strategy</b></p>
         <p>
             For each of the three clusters I ran a separate <b>one-vs-rest</b> comparison: Cluster 1 vs 
-            (Cluster 2 + Cluster 3), then Cluster 2 vs the others, then Cluster 3 vs the others. Each 
-            comparison produces a ranked list of genes with their logFC (how much more expressed in this 
-            cluster vs the rest) and an adjusted p-value.
+            (Cluster 2 + Cluster 3), then Cluster 2 vs the others, then Cluster 3 vs the others. The point of this was that each 
+            comparison would produce a ranked list of genes with their logFC and an adjusted p-value reflecting how more/less expressed 
+            compared to the other clusters.
         </p>
         <p>
             The core limma workflow for each comparison is three lines:
-            <br>1. <b>lmFit</b>: fits a linear model to the expression data using the one-vs-rest design matrix
-            <br>2. <b>eBayes</b>: applies empirical Bayes moderation, it borrows information across all genes 
-            to stabilize variance estimates, which is especially important when sample sizes per group are unequal
+            <br>1. <b>lmFit</b>: for each gene it estimates how much does expression differ between cluster and rest
+            <br>2. <b>eBayes</b>: applies empirical Bayes moderation, it is needed to make per-gene variance estimates of smaller groups
+            (k = 3) less noisy. 
+
             <br>3. <b>topTable</b>: extracts the ranked results table with logFC, p-values, and B-statistics
         </p>
     </div>
@@ -520,31 +522,30 @@
         <p>
             Finding genes upregulated in one cluster is not enough, a gene might be upregulated in both 
             Cluster 1 AND Cluster 2, which makes it useless as a marker for either. To find <b>true markers</b> 
-            I added a specificity filter: a gene qualifies only if it passes both of these conditions:
+            it was needed to add specificity filters, so genes qualify only if they pass both of these conditions:
         </p>
         <p>
             <br>1. It is significantly upregulated in its cluster: <b>logFC > 1.5</b> and <b>adjusted p-value &lt; 0.05</b>
             <br>2. It is upregulated in <b>exactly one cluster</b> and not in any other
         </p>
         <p>
-            This two-step filter is what separates genuine cluster-specific markers from generic 
-            upregulation that happens to be significant. The result was:
+            This two-step filter is what separated genuine cluster-specific markers from generic 
+            upregulation that happens to be significant. This filtering step yielded 985 elegible genes:
             <br>Cluster 1: <b>279 specific marker genes</b>
             <br>Cluster 2: <b>299 specific marker genes</b>
             <br>Cluster 3: <b>407 specific marker genes</b>
         </p>
         <p>
-            Cluster 3 having the most markers is consistent with what we saw in the heatmap, it is the 
-            most transcriptionally distinct group, so it has the most genes that are uniquely and 
-            specifically characteristic of it. Both the full marker tables and the top 20 per cluster 
-            were saved as CSVs for further inspection.
+            Cluster 3 having the most markers was consistent with what we saw in the heatmap, by that time it already 
+            looked like the most transcriptionally distinct group, so it has the most genes that are uniquely and 
+            specifically characteristic of it.
         </p>
     </div>
 
     <p>
         Finally I built a focused heatmap showing the <b>top 20 marker genes per cluster</b> (60 genes 
-        total) across all 767 patients. This is a much more interpretable visualization than the 5000-gene 
-        heatmap, each row is a gene that was specifically selected because it defines one of the three 
+        total) across all 767 patients which is a much more readable than the 5000-gene 
+        heatmap. Each row is a gene that was specifically selected because it defines one of the three 
         groups. The rows are annotated on the left with which cluster they belong to, and patients are 
         again ordered and annotated by cluster on top. Row scaling (z-score per gene) is applied directly 
         inside pheatmap via <b>scale = "row"</b> so the color patterns reflect relative expression 
@@ -557,11 +558,10 @@
     <div class="interp-box">
         <p class="interp-title"><b>Interpretation: Top 20 Marker Genes per Cluster</b></p>
         <p>
-            <b>What am I looking at?</b> This heatmap shows 60 genes, the top 20 most specifically 
-            upregulated markers for each of the three clusters, across all 767 patients. Unlike the 
-            5000-gene heatmap which showed the overall transcriptional landscape, every single row here 
-            was hand-selected by the limma analysis to be a genuine cluster-specific marker. The color 
-            annotation bar on the left tells you which cluster each gene belongs to, and the bar on top 
+            <b>What is this?</b> This heatmap shows 60 genes, the top 20 most specifically 
+            upregulated markers for each of the three clusters, across all 767 patients. Every single row here 
+            was "hand-selected" by limma for looking like a feasible cluster-specific marker. The color 
+            annotation bar on the right tells you which cluster each gene belongs to, and the bar on top 
             shows the patient cluster assignments as before.
         </p>
         <p>
@@ -573,12 +573,11 @@
             meaningful the clustering is.
         </p>
         <p>
-            <b>Cluster 3 markers are the most striking.</b> Consistent with having 407 specific markers,
-            the most of the three groups, the Cluster 3 gene block shows the sharpest contrast: genes 
-            that are strongly red in the green patient block and clearly suppressed everywhere else. This 
-            confirms that Cluster 3 has the most distinct transcriptional identity in the cohort, and 
-            these marker genes are the starting point for understanding what biological program defines 
-            this high-risk subgroup.
+            <b>Cluster 3 markers are the most satisfying ones</b> Consistent with having 407 specific markers,
+            the most of the three groups while counting only 127 patients, the Cluster 3 gene block shows the 
+            most intense contrast: genes 
+            that are strongly red in the green patient block are suppressed everywhere else. This 
+            confirms that Cluster 3 has the most distinct transcriptional identity in the cohort.
         </p>
         <p>
             Overall, this heatmap is the final deliverable of the entire pipeline: starting from raw 
